@@ -1,0 +1,81 @@
+import { Link } from "react-router-dom";
+import { levels } from "../lib/content";
+import { isUnlocked, isPassed, getResult } from "../lib/progress";
+import { useProgress } from "../lib/useProgress";
+
+const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII"];
+
+export default function Home() {
+  useProgress();
+
+  return (
+    <div>
+      <p className="lead">
+        Последовательный путь обучения — от первых шагов веры до подготовки к
+        служению. Каждый урок завершается тестом; следующий открывается после
+        того, как тест сдан.
+      </p>
+
+      {levels.map((level, li) => (
+        <section className="level-card" key={level.id}>
+          <div className="level-head">
+            <span className="level-num">Уровень {ROMAN[li + 1]}</span>
+          </div>
+          <h2>{level.title}</h2>
+          {level.audience && <div className="audience">{level.audience}</div>}
+          {level.description && <p className="desc">{level.description}</p>}
+
+          {level.modules.map((module) => (
+            <div className="module" key={module.id}>
+              <h3>{module.title}</h3>
+              {module.description && <p className="mdesc">{module.description}</p>}
+              <ul className="lesson-list">
+                {module.lessons.map((lesson) => {
+                  const unlocked = isUnlocked(lesson.id);
+                  const passed = isPassed(lesson.id);
+                  const res = getResult(lesson.id);
+                  const cls = `lesson-row ${passed ? "passed" : ""} ${
+                    unlocked ? "" : "locked"
+                  }`;
+                  const inner = (
+                    <>
+                      <span className="marker">
+                        {passed ? "✓" : unlocked ? "○" : "🔒"}
+                      </span>
+                      <span className="ltitle">{lesson.title}</span>
+                      {res && (
+                        <span className="score">
+                          {res.passed ? `сдан · ${res.score}%` : `${res.score}%`}
+                        </span>
+                      )}
+                    </>
+                  );
+                  return (
+                    <li className={cls} key={lesson.id}>
+                      {unlocked ? (
+                        <Link
+                          to={`/lesson/${encodeURIComponent(lesson.id)}`}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 12,
+                            flex: 1,
+                            color: "inherit",
+                          }}
+                        >
+                          {inner}
+                        </Link>
+                      ) : (
+                        inner
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+  );
+}

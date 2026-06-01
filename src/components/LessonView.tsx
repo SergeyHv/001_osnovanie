@@ -1,0 +1,111 @@
+import { useEffect, useMemo } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { marked } from "marked";
+import { getLesson, lessonSequence, lessonIndex, levels } from "../lib/content";
+import { isUnlocked, isPassed, markCompleted } from "../lib/progress";
+import { useProgress } from "../lib/useProgress";
+import Quiz from "./Quiz";
+
+marked.setOptions({ breaks: false, gfm: true });
+
+export default function LessonView() {
+  const { lessonId } = useParams();
+  const navigate = useNavigate();
+  useProgress(); // перерисовка при изменении прогресса
+
+  const lesson = lessonId ? getLesson(decodeURIComponent(lessonId)) : undefined;
+
+  const html = useMemo(
+    () => (lesson ? marked.parse(lesson.markdown) : ""),
+    [lesson],
+  );
+
+  // Урок без теста считается пройденным по факту открытия (если разблокирован).
+  useEffect(() => {
+    if (lesson && !lesson.quiz && isUnlocked(lesson.id)) {
+      markCompleted(lesson.id);
+    }
+  }, [lesson]);
+
+  if (!lesson) {
+    return (
+      <div>
+        <p>Урок не найден.</p>
+        <Link to="/">← К списку уровней</Link>
+      </div>
+    );
+  }
+
+  const unlocked = isUnlocked(lesson.id);
+  const idx = lessonIndex(lesson.id);
+  const prev = idx > 0 ? lessonSequence[idx - 1] : undefined;
+  const next = idx < lessonSequence.length - 1 ? lessonSequence[idx + 1] : undefined;
+  const nextUnlocked = next ? isPassed(lesson.id) : false;
+
+  const level = levels.find((l) => l.id === lesson.levelId);
+  const module = level?.modules.find((m) => m.id === lesson.moduleId);
+
+  if (!unlocked) {
+    return (
+      <div>
+        <div className="crumbs">
+          <Link to="/">Уровни</Link> · {level?.title} · {module?.title}
+        </div>
+        <h1>{lesson.title}</h1>
+        <div className="note-locked">
+          Этот урок пока закрыт. Чтобы открыть его, сдайте тест предыдущего урока
+          {prev && (
+            <>
+              {" "}
+              — <Link to={`/lesson/${encodeURIComponent(prev.id)}`}>{prev.title}</Link>.
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="crumbs">
+        <Link to="/">Уровни</Link> · {level?.title} · {module?.title}
+      </div>
+
+      <article
+        className="lesson-body"
+        dangerouslySetInnerHTML={{ __html: html as string }}
+      />
+
+      {lesson.quiz && <Quiz lessonId={lesson.id} quiz={lesson.quiz} />}
+
+      <nav className="lesson-nav">
+        {prev ? (
+          <Link
+            className="btn secondary"
+            to={`/lesson/${encodeURIComponent(prev.id)}`}
+          >
+            ← {prev.title}
+          </Link>
+        ) : (
+          <Link className="btn secondary" to="/">
+            ← К уровням
+          </Link>
+        )}
+
+        {next &&
+          (nextUnlocked ? (
+            <button
+              className="btn"
+              onClick={() => navigate(`/lesson/${encodeURIComponent(next.id)}`)}
+            >
+              {next.title} →
+            </button>
+          ) : (
+            <button className="btn" disabled title="Сдайте тест, чтобы продолжить">
+              Дальше после теста →
+            </button>
+          ))}
+      </nav>
+    </div>
+  );
+}
