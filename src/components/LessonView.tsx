@@ -76,7 +76,7 @@ export default function LessonView() {
         dangerouslySetInnerHTML={{ __html: html as string }}
       />
 
-      {lesson.quiz && <Quiz lessonId={lesson.id} quiz={lesson.quiz} />}
+      {lesson.quiz && <Quiz key={lesson.id} lessonId={lesson.id} quiz={lesson.quiz} />}
 
       <nav className="lesson-nav">
         {prev ? (
