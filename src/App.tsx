@@ -10,9 +10,12 @@ function Header() {
   return (
     <header className="site-header">
       <div className="brand">
-        <Link to="/">
-          Основание
-          <small>обучение для христиан · Ковчег спасения</small>
+        <Link to="/" className="brand-link">
+          <img src="/logo.png" alt="Ковчег спасения" className="brand-logo" />
+          <span className="brand-text">
+            Основание
+            <small>обучение для христиан · Ковчег спасения</small>
+          </span>
         </Link>
       </div>
       <div className="header-progress">

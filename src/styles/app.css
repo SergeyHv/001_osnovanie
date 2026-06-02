@@ -451,3 +451,33 @@ h3 {
     width: 120px;
   }
 }
+
+/* ── Логотип в шапке ─────────────────────────────────── */
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: inherit;
+}
+.brand-link:hover {
+  text-decoration: none;
+}
+.brand-logo {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  padding: 7px;
+  background: var(--accent);
+  border-radius: 12px;
+  object-fit: contain;
+}
+.brand-text {
+  display: block;
+}
+@media (max-width: 600px) {
+  .brand-logo {
+    width: 42px;
+    height: 42px;
+    padding: 5px;
+  }
+}
