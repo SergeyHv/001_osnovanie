@@ -12,7 +12,7 @@ function Header() {
       <div className="brand">
         <Link to="/">
           Основание
-          <small>обучение для христиан</small>
+          <small>обучение для христиан.</small>
         </Link>
       </div>
       <div className="header-progress">
