@@ -2,17 +2,17 @@ import type { Level, Module, Lesson, Quiz, MetaFile } from "./types";
 
 // Vite собирает все файлы контента на этапе сборки.
 // Markdown — как сырой текст, JSON — как объекты.
-const markdownFiles = import.meta.glob("/content/**/*.md", {
+const markdownFiles = import.meta.glob("/src/content/**/*.md", {
   query: "?raw",
   import: "default",
   eager: true,
 }) as Record<string, string>;
 
-const quizFiles = import.meta.glob("/content/**/*.quiz.json", {
+const quizFiles = import.meta.glob("/src/content/**/*.quiz.json", {
   eager: true,
 }) as Record<string, { default: Quiz }>;
 
-const metaFiles = import.meta.glob("/content/**/_meta.json", {
+const metaFiles = import.meta.glob("/src/content/**/_meta.json", {
   eager: true,
 }) as Record<string, { default: MetaFile }>;
 
@@ -35,7 +35,7 @@ function titleFromMarkdown(md: string, fallback: string): string {
 
 /** Путь вида /content/level-1/01-mod/01-lesson.md -> сегменты. */
 function segments(path: string): string[] {
-  return path.replace(/^\/content\//, "").split("/");
+  return path.replace(/^\/src\/content\//, "").split("/");
 }
 
 function buildContentTree(): Level[] {
