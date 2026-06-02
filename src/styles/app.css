@@ -1,18 +1,18 @@
 :root {
-  /* Тёплая «пергаментная» палитра с глубоким сине-чернильным акцентом */
-  --bg: #f5f0e6;
-  --bg-raised: #fbf8f1;
-  --ink: #2b2620;
-  --ink-soft: #5c5346;
-  --ink-faint: #8a7e6c;
-  --line: #e3d9c6;
-  --accent: #7a2e1d; /* терракота / сурик */
-  --accent-deep: #5c2114;
+  /* Фирменная синяя палитра общины «Ковчег спасения» */
+  --bg: #eef1f6;
+  --bg-raised: #f8fafc;
+  --ink: #1e2633;
+  --ink-soft: #4a5468;
+  --ink-faint: #8089a0;
+  --line: #d7deea;
+  --accent: #3b4d71; /* фирменный синий «Ковчега спасения» */
+  --accent-deep: #2c3b59;
   --gold: #b08828;
-  --blue: #2a3a52;
+  --blue: #2c3b59;
   --ok: #3d6b4a;
-  --locked: #b6ab97;
-  --shadow: 0 1px 2px rgba(43, 38, 32, 0.06), 0 8px 28px rgba(43, 38, 32, 0.08);
+  --locked: #aab2c4;
+  --shadow: 0 1px 2px rgba(30, 38, 51, 0.06), 0 8px 28px rgba(30, 38, 51, 0.08);
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Spectral", Georgia, serif;
@@ -37,10 +37,10 @@ body {
   /* лёгкая бумажная текстура из градиентов */
   background-image: radial-gradient(
       circle at 20% 10%,
-      rgba(176, 136, 40, 0.05),
+      rgba(59, 77, 113, 0.05),
       transparent 40%
     ),
-    radial-gradient(circle at 85% 90%, rgba(122, 46, 29, 0.04), transparent 45%);
+    radial-gradient(circle at 85% 90%, rgba(44, 59, 89, 0.05), transparent 45%);
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 18px;
@@ -450,182 +450,4 @@ h3 {
   .header-progress .bar {
     width: 120px;
   }
-}
-
-/* ── Размышление / самопроверка ──────────────────────── */
-.reflection {
-  margin-top: 44px;
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--blue);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 28px 30px;
-}
-.reflection h2 {
-  margin-top: 4px;
-}
-.reflection .qtag {
-  color: var(--blue);
-}
-.reflection-note {
-  font-size: 15px;
-  color: var(--ink-soft);
-  background: rgba(42, 58, 82, 0.06);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  margin: 0 0 18px;
-}
-.reflection-intro {
-  color: var(--ink-soft);
-}
-.reflect-item {
-  margin: 22px 0;
-}
-.reflect-input {
-  width: 100%;
-  font-family: var(--font-body);
-  font-size: 17px;
-  line-height: 1.6;
-  color: var(--ink);
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  margin: 8px 0 10px;
-  resize: vertical;
-}
-.reflect-input:focus {
-  outline: none;
-  border-color: var(--blue);
-}
-.model-answer {
-  margin-top: 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: rgba(176, 136, 40, 0.06);
-  padding: 14px 18px;
-}
-.model-label {
-  font-size: 13px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 6px;
-}
-.model-text p {
-  margin: 0 0 10px;
-}
-.model-text p:last-child {
-  margin-bottom: 0;
-}
-.model-text ul,
-.model-text ol {
-  margin: 0 0 10px;
-  padding-left: 1.3em;
-}
-.rubric {
-  margin-top: 14px;
-  border-top: 1px dotted var(--line);
-  padding-top: 12px;
-}
-.rubric-title {
-  font-size: 15px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: var(--ink-soft);
-}
-.rubric-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 16px;
-  padding: 5px 0;
-  cursor: pointer;
-}
-.rubric-item input {
-  margin-top: 4px;
-}
-.reflect-done {
-  color: var(--ok);
-  font-weight: 500;
-  margin-top: 8px;
-}
-
-/* ── Эмблемы уровней (SVG) ───────────────────────────── */
-.level-card-head {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 6px;
-}
-.level-emblem {
-  flex: none;
-  width: 64px;
-  height: 64px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: #fff;
-  color: var(--accent);
-  box-shadow: var(--shadow);
-}
-.level-card-head .level-num {
-  display: block;
-  margin-bottom: 2px;
-}
-.level-card-head h2 {
-  margin: 0;
-}
-
-/* ── Кнопка «Спросить наставника» ────────────────────── */
-.mentor-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
-.mentor-hint {
-  font-size: 13px;
-  color: var(--ink-faint);
-  max-width: 46ch;
-}
-.btn.ghost {
-  background: transparent;
-  color: var(--blue);
-  border: 1px dashed var(--blue);
-  font-size: 15px;
-  padding: 8px 18px;
-}
-.btn.ghost:hover {
-  background: rgba(42, 58, 82, 0.06);
-}
-.mentor-box {
-  margin-top: 14px;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--blue);
-  border-radius: var(--radius);
-  background: rgba(42, 58, 82, 0.04);
-  padding: 16px 18px;
-}
-.mentor-label {
-  font-size: 13px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--blue);
-  margin-bottom: 8px;
-}
-.mentor-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-}
-.mentor-foot {
-  font-size: 13px;
-  color: var(--ink-faint);
-  margin: 12px 0 0;
 }
