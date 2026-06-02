@@ -17,6 +17,7 @@ export default function AskMentor({ lessonTitle, draft }: Props) {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [copied, setCopied] = useState(false);
+  const [mailHint, setMailHint] = useState(false);
 
   if (!mentorConfig.enabled) return null;
 
@@ -41,6 +42,7 @@ export default function AskMentor({ lessonTitle, draft }: Props) {
       buildBody(),
     )}`;
     window.location.href = url;
+    setMailHint(true);
   }
 
   async function copyText() {
@@ -49,7 +51,6 @@ export default function AskMentor({ lessonTitle, draft }: Props) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      // запасной путь, если буфер недоступен
       alert("Не удалось скопировать. Выделите текст вручную:\n\n" + buildBody());
     }
   }
@@ -58,7 +59,7 @@ export default function AskMentor({ lessonTitle, draft }: Props) {
     return (
       <div className="mentor-row">
         <button className="btn ghost" onClick={() => setOpen(true)}>
-          ✉️ Спросить {mentorConfig.mentorName}
+          ✉️ Спросить наставника
         </button>
         <span className="mentor-hint">
           Если по этой теме остаётся личный или трудный вопрос — обратитесь к
@@ -70,7 +71,7 @@ export default function AskMentor({ lessonTitle, draft }: Props) {
 
   return (
     <div className="mentor-box">
-      <div className="mentor-label">Ваш вопрос {mentorConfig.mentorName}</div>
+      <div className="mentor-label">Ваш вопрос наставнику</div>
       <textarea
         className="reflect-input"
         rows={3}
@@ -81,7 +82,7 @@ export default function AskMentor({ lessonTitle, draft }: Props) {
       <div className="mentor-actions">
         {mentorConfig.email && (
           <button className="btn" onClick={sendEmail}>
-            Открыть письмо
+            Отправить письмо
           </button>
         )}
         <button className="btn secondary" onClick={copyText}>
@@ -91,9 +92,17 @@ export default function AskMentor({ lessonTitle, draft }: Props) {
           отмена
         </button>
       </div>
+      {mailHint && (
+        <p className="mentor-hint" style={{ marginTop: 10 }}>
+          Если почтовая программа не открылась — у вас может быть не настроена
+          почта на устройстве. Тогда нажмите «Скопировать текст» и вставьте его в
+          вашу почту или мессенджер общины.
+        </p>
+      )}
       <p className="mentor-foot">
-        «Открыть письмо» откроет вашу почтовую программу с готовым текстом.
-        «Скопировать» — для отправки в мессенджер общины. Отправляете вы сами.
+        «Отправить письмо» откроет вашу почтовую программу с готовым текстом.
+        «Скопировать текст» — для отправки через веб-почту или мессенджер. Письмо
+        отправляете вы сами.
       </p>
     </div>
   );
