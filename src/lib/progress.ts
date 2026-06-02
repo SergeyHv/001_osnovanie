@@ -1,11 +1,12 @@
 import { lessonSequence, lessonIndex } from "./content";
 
 const STORAGE_KEY = "osnovanie:progress:v1";
+const REFLECTION_KEY = "osnovanie:reflection:v1";
 
 export interface LessonResult {
   /** Лучший результат в процентах. */
   score: number;
-  /** Сдан ли тест (достигнут проходной балл). */
+  /** Сдан ли тест / пройден ли урок. */
   passed: boolean;
   /** ISO-дата прохождения. */
   at: string;
@@ -25,10 +26,9 @@ function read(): Progress {
 function write(p: Progress): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
-    // Уведомляем компоненты в этой же вкладке.
     window.dispatchEvent(new Event("progress-changed"));
   } catch {
-    // localStorage может быть недоступен (приватный режим) — тихо игнорируем.
+    /* localStorage может быть недоступен — игнорируем */
   }
 }
 
@@ -44,10 +44,7 @@ export function isPassed(lessonId: string): boolean {
   return read()[lessonId]?.passed ?? false;
 }
 
-/**
- * Записывает результат теста. Сохраняет лучший балл.
- * Урок без теста можно отметить пройденным через markCompleted.
- */
+/** Записывает результат теста. Сохраняет лучший балл. */
 export function saveResult(lessonId: string, score: number, passingScore: number): void {
   const p = read();
   const passed = score >= passingScore;
@@ -60,7 +57,7 @@ export function saveResult(lessonId: string, score: number, passingScore: number
   write(p);
 }
 
-/** Отмечает урок без теста как пройденный. */
+/** Отмечает урок как пройденный (для уроков без теста или после размышления). */
 export function markCompleted(lessonId: string): void {
   const p = read();
   if (!p[lessonId]?.passed) {
@@ -71,7 +68,7 @@ export function markCompleted(lessonId: string): void {
 
 /**
  * Строгая последовательность: урок открыт, если это первый урок
- * или предыдущий урок в общей последовательности сдан.
+ * или предыдущий урок в общей последовательности пройден.
  */
 export function isUnlocked(lessonId: string): boolean {
   const idx = lessonIndex(lessonId);
@@ -83,16 +80,46 @@ export function isUnlocked(lessonId: string): boolean {
 export function resetProgress(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(REFLECTION_KEY);
     window.dispatchEvent(new Event("progress-changed"));
   } catch {
     /* ignore */
   }
 }
 
-/** Доля сданных уроков (0..1) — для индикатора. */
+/** Доля пройденных уроков (0..1) — для индикатора. */
 export function overallProgress(): number {
   if (lessonSequence.length === 0) return 0;
   const p = read();
   const done = lessonSequence.filter((l) => p[l.id]?.passed).length;
   return done / lessonSequence.length;
+}
+
+/* ── Ответы размышления (хранятся отдельно от оценок) ─────────────── */
+
+type ReflectionStore = Record<string, string[]>; // lessonId -> ответы по индексу задания
+
+function readReflections(): ReflectionStore {
+  try {
+    const raw = localStorage.getItem(REFLECTION_KEY);
+    return raw ? (JSON.parse(raw) as ReflectionStore) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function getReflectionAnswers(lessonId: string): string[] {
+  return readReflections()[lessonId] ?? [];
+}
+
+export function saveReflectionAnswer(lessonId: string, index: number, text: string): void {
+  try {
+    const store = readReflections();
+    const arr = store[lessonId] ?? [];
+    arr[index] = text;
+    store[lessonId] = arr;
+    localStorage.setItem(REFLECTION_KEY, JSON.stringify(store));
+  } catch {
+    /* ignore */
+  }
 }

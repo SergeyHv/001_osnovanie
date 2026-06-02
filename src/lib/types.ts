@@ -26,6 +26,24 @@ export interface Quiz {
   questions: QuizQuestion[];
 }
 
+/** Одно задание на размышление с самопроверкой по эталону. */
+export interface ReflectionPrompt {
+  /** Текст задания/вопроса. */
+  q: string;
+  /** Подсказка в поле ввода (необязательно). */
+  placeholder?: string;
+  /** Эталонный разбор (Markdown), который открывается после ответа студента. */
+  model: string;
+  /** Критерии для самопроверки (необязательно). */
+  rubric?: string[];
+}
+
+export interface Reflection {
+  /** Необязательное вступление к блоку размышления. */
+  intro?: string;
+  prompts: ReflectionPrompt[];
+}
+
 export interface Lesson {
   /** Уникальный идентификатор: level/module/lesson-slug. */
   id: string;
@@ -33,8 +51,10 @@ export interface Lesson {
   title: string;
   /** Сырой Markdown-текст урока. */
   markdown: string;
-  /** Тест урока, если есть. */
+  /** Тест урока (автопроверка), если есть. */
   quiz?: Quiz;
+  /** Блок размышления с самопроверкой, если есть. */
+  reflection?: Reflection;
   /** Порядковый номер внутри модуля (из префикса имени файла). */
   order: number;
   /** Идентификатор модуля-родителя. */

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { levels } from "../lib/content";
 import { isUnlocked, isPassed, getResult } from "../lib/progress";
 import { useProgress } from "../lib/useProgress";
+import LevelEmblem from "./LevelEmblem";
 
 const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII"];
 
@@ -12,17 +13,22 @@ export default function Home() {
     <div>
       <p className="lead">
         Последовательный путь обучения — от первых шагов веры до подготовки к
-        служению. Каждый урок завершается тестом; следующий открывается после
-        того, как тест сдан.
+        служению. Каждый урок завершается заданием; следующий открывается после
+        того, как предыдущий пройден.
       </p>
 
       {levels.map((level, li) => (
         <section className="level-card" key={level.id}>
-          <div className="level-head">
-            <span className="level-num">Уровень {ROMAN[li + 1]}</span>
+          <div className="level-card-head">
+            <span className="level-emblem">
+              <LevelEmblem level={li + 1} />
+            </span>
+            <div>
+              <span className="level-num">Уровень {ROMAN[li + 1]}</span>
+              <h2>{level.title}</h2>
+              {level.audience && <div className="audience">{level.audience}</div>}
+            </div>
           </div>
-          <h2>{level.title}</h2>
-          {level.audience && <div className="audience">{level.audience}</div>}
           {level.description && <p className="desc">{level.description}</p>}
 
           {level.modules.map((module) => (
@@ -45,7 +51,7 @@ export default function Home() {
                       <span className="ltitle">{lesson.title}</span>
                       {res && (
                         <span className="score">
-                          {res.passed ? `сдан · ${res.score}%` : `${res.score}%`}
+                          {res.passed ? `пройден · ${res.score}%` : `${res.score}%`}
                         </span>
                       )}
                     </>

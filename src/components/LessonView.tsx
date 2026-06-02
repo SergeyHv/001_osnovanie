@@ -5,6 +5,7 @@ import { getLesson, lessonSequence, lessonIndex, levels } from "../lib/content";
 import { isUnlocked, isPassed, markCompleted } from "../lib/progress";
 import { useProgress } from "../lib/useProgress";
 import Quiz from "./Quiz";
+import Reflection from "./Reflection";
 
 marked.setOptions({ breaks: false, gfm: true });
 
@@ -20,9 +21,9 @@ export default function LessonView() {
     [lesson],
   );
 
-  // Урок без теста считается пройденным по факту открытия (если разблокирован).
+  // Урок без теста И без размышления считается пройденным по факту открытия.
   useEffect(() => {
-    if (lesson && !lesson.quiz && isUnlocked(lesson.id)) {
+    if (lesson && !lesson.quiz && !lesson.reflection && isUnlocked(lesson.id)) {
       markCompleted(lesson.id);
     }
   }, [lesson]);
@@ -53,7 +54,7 @@ export default function LessonView() {
         </div>
         <h1>{lesson.title}</h1>
         <div className="note-locked">
-          Этот урок пока закрыт. Чтобы открыть его, сдайте тест предыдущего урока
+          Этот урок пока закрыт. Чтобы открыть его, завершите предыдущий урок
           {prev && (
             <>
               {" "}
@@ -76,7 +77,18 @@ export default function LessonView() {
         dangerouslySetInnerHTML={{ __html: html as string }}
       />
 
-      {lesson.quiz && <Quiz key={lesson.id} lessonId={lesson.id} quiz={lesson.quiz} />}
+      {lesson.quiz && (
+        <Quiz key={lesson.id} lessonId={lesson.id} quiz={lesson.quiz} />
+      )}
+
+      {lesson.reflection && (
+        <Reflection
+          key={lesson.id}
+          lessonId={lesson.id}
+          lessonTitle={lesson.title}
+          reflection={lesson.reflection}
+        />
+      )}
 
       <nav className="lesson-nav">
         {prev ? (
@@ -101,8 +113,8 @@ export default function LessonView() {
               {next.title} →
             </button>
           ) : (
-            <button className="btn" disabled title="Сдайте тест, чтобы продолжить">
-              Дальше после теста →
+            <button className="btn" disabled title="Завершите урок, чтобы продолжить">
+              Дальше после задания →
             </button>
           ))}
       </nav>

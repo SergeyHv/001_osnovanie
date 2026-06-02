@@ -1,7 +1,8 @@
-import type { Level, Module, Lesson, Quiz, MetaFile } from "./types";
+import type { Level, Module, Lesson, Quiz, Reflection, MetaFile } from "./types";
 
 // Vite собирает все файлы контента на этапе сборки.
 // Markdown — как сырой текст, JSON — как объекты.
+// ВАЖНО: контент лежит в папке src/content, поэтому пути начинаются с /src/content.
 const markdownFiles = import.meta.glob("/src/content/**/*.md", {
   query: "?raw",
   import: "default",
@@ -11,6 +12,10 @@ const markdownFiles = import.meta.glob("/src/content/**/*.md", {
 const quizFiles = import.meta.glob("/src/content/**/*.quiz.json", {
   eager: true,
 }) as Record<string, { default: Quiz }>;
+
+const reflectionFiles = import.meta.glob("/src/content/**/*.reflection.json", {
+  eager: true,
+}) as Record<string, { default: Reflection }>;
 
 const metaFiles = import.meta.glob("/src/content/**/_meta.json", {
   eager: true,
@@ -33,7 +38,7 @@ function titleFromMarkdown(md: string, fallback: string): string {
   return m ? m[1].trim() : fallback;
 }
 
-/** Путь вида /content/level-1/01-mod/01-lesson.md -> сегменты. */
+/** Путь вида /src/content/level-1/01-mod/01-lesson.md -> сегменты. */
 function segments(path: string): string[] {
   return path.replace(/^\/src\/content\//, "").split("/");
 }
@@ -80,15 +85,18 @@ function buildContentTree(): Level[] {
     const moduleId = `${levelId}/${stripOrder(moduleDir)}`;
     const lessonId = `${moduleId}/${slug}`;
 
-    // Сопоставляем тест по соседнему .quiz.json
+    // Сопоставляем тест и размышление по соседним файлам.
     const quizPath = path.replace(/\.md$/, ".quiz.json");
+    const reflectionPath = path.replace(/\.md$/, ".reflection.json");
     const quiz = quizFiles[quizPath]?.default;
+    const reflection = reflectionFiles[reflectionPath]?.default;
 
     const lesson: Lesson = {
       id: lessonId,
       title: titleFromMarkdown(md, slug),
       markdown: md,
       quiz,
+      reflection,
       order: orderOf(file),
       moduleId,
       levelId,
