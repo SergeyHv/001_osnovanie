@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../lib/useAuth";
+import { deleteMyData } from "../lib/sync";
 
 const wrap: React.CSSProperties = {
   display: "flex",
@@ -40,6 +41,10 @@ const link: React.CSSProperties = {
   padding: 0,
   textDecoration: "underline",
 };
+const linkDanger: React.CSSProperties = {
+  ...link,
+  color: "var(--accent-deep, #2c3b59)",
+};
 
 export default function AccountBar() {
   const { user, loading } = useAuth();
@@ -55,13 +60,36 @@ export default function AccountBar() {
 
   if (user) {
     return (
-      <div style={wrap}>
-        <span>
-          Вы вошли: <b>{user.email}</b>
-        </span>
-        <button style={link} onClick={() => supabase.auth.signOut()}>
-          Выйти
-        </button>
+      <div style={{ ...wrap, flexDirection: "column", alignItems: "flex-end" }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <span>
+            Вы вошли: <b>{user.email}</b> · прогресс сохраняется в вашем аккаунте
+          </span>
+          <button style={link} onClick={() => supabase.auth.signOut()}>
+            Выйти
+          </button>
+          <button
+            style={linkDanger}
+            onClick={async () => {
+              const ok = confirm(
+                "Удалить весь ваш прогресс обучения с сервера и с этого устройства? Это действие необратимо. (Сам вход по email останется; чтобы полностью удалить учётную запись, обратитесь к администратору.)",
+              );
+              if (!ok) return;
+              setBusy(true);
+              const res = await deleteMyData();
+              setBusy(false);
+              if (res.ok) {
+                await supabase.auth.signOut();
+                alert("Ваши данные удалены.");
+              } else {
+                alert("Не удалось удалить данные: " + res.error);
+              }
+            }}
+            disabled={busy}
+          >
+            {busy ? "Удаление…" : "Удалить мои данные"}
+          </button>
+        </div>
       </div>
     );
   }
@@ -84,8 +112,6 @@ export default function AccountBar() {
     const { error } = await supabase.auth.signInWithOtp({
       email: e,
       options: {
-        // Вернуть человека на ту же страницу, откуда он входил
-        // (работает и на localhost, и на «живом» сайте).
         emailRedirectTo: window.location.origin + "/",
       },
     });
@@ -130,6 +156,10 @@ export default function AccountBar() {
           {msg}
         </div>
       )}
+      <div style={{ fontSize: 12, color: "var(--ink-faint, #8089a0)", maxWidth: 380, marginTop: 4 }}>
+        Входя, вы соглашаетесь, что мы храним вашу почту и прогресс обучения. Для
+        несовершеннолетних — с согласия родителей.
+      </div>
     </div>
   );
 }

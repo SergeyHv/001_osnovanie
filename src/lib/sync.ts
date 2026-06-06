@@ -5,6 +5,7 @@ import type { Progress } from "./progress";
 // Тексты размышлений НЕ синхронизируются — они остаются только на устройстве.
 
 const KEY = "osnovanie:progress:v1"; // тот же ключ, что и в progress.ts
+const REFLECTION_KEY = "osnovanie:reflection:v1";
 const TABLE = "user_progress";
 
 function readLocal(): Progress {
@@ -19,7 +20,6 @@ function readLocal(): Progress {
 function writeLocal(p: Progress): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(p));
-    // Сообщаем интерфейсу, что прогресс обновился.
     window.dispatchEvent(new Event("progress-changed"));
   } catch {
     /* ignore */
@@ -62,7 +62,7 @@ async function pull(): Promise<void> {
   const server: Progress = ((data?.data as Progress) ?? {}) as Progress;
   const merged = mergeProgress(readLocal(), server);
   writeLocal(merged);
-  await push(); // вернуть объединённый прогресс на сервер
+  await push();
 }
 
 async function push(): Promise<void> {
@@ -84,6 +84,30 @@ function schedulePush(): void {
   }, 1500);
 }
 
+/** Удаляет прогресс пользователя с сервера и очищает данные на устройстве. */
+export async function deleteMyData(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    if (currentUserId) {
+      const { error } = await supabase
+        .from(TABLE)
+        .delete()
+        .eq("user_id", currentUserId);
+      if (error) return { ok: false, error: error.message };
+    }
+    // Очищаем локальные данные (прогресс и тексты размышлений).
+    try {
+      localStorage.removeItem(KEY);
+      localStorage.removeItem(REFLECTION_KEY);
+      window.dispatchEvent(new Event("progress-changed"));
+    } catch {
+      /* ignore */
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 /** Запускается один раз при старте приложения. */
 export function initSync(): void {
   if (started) return;
@@ -98,12 +122,11 @@ export function initSync(): void {
     const newId = session?.user?.id ?? null;
     if (newId && newId !== currentUserId) {
       currentUserId = newId;
-      void pull(); // вошёл — подтянуть и объединить
+      void pull();
     } else if (!newId) {
-      currentUserId = null; // вышел — больше не синхронизируем
+      currentUserId = null;
     }
   });
 
-  // Любое изменение прогресса на устройстве — отправляем на сервер (с задержкой).
   window.addEventListener("progress-changed", schedulePush);
 }
