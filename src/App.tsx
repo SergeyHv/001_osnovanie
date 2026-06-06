@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route, Link } from "react-router-dom";
 import Home from "./components/Home";
 import LessonView from "./components/LessonView";
+import AccountBar from "./components/AccountBar";
 import { overallProgress, resetProgress } from "./lib/progress";
 import { useProgress } from "./lib/useProgress";
 
@@ -48,6 +49,7 @@ export default function App() {
   return (
     <HashRouter>
       <div className="app">
+        <AccountBar />
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
