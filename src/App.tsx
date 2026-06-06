@@ -31,12 +31,7 @@ function Header() {
 function Footer() {
   return (
     <footer className="footer">
-      <span>
-        Открытый проект · код на{" "}
-        <a href="https://github.com/" target="_blank" rel="noreferrer">
-          GitHub
-        </a>
-      </span>
+      <span>Ковчег спасения</span>
       <button
         className="linklike"
         onClick={() => {
