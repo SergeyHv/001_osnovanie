@@ -2,7 +2,6 @@ import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../lib/useAuth";
 
-// Встроенные стили, чтобы не трогать общий CSS (низкий риск).
 const wrap: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -46,16 +45,14 @@ export default function AccountBar() {
   const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [stage, setStage] = useState<"enterEmail" | "enterCode">("enterEmail");
   const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
   const [msg, setMsg] = useState("");
 
   if (loading) {
     return <div style={wrap}>…</div>;
   }
 
-  // Вошёл — показываем email и кнопку выхода.
   if (user) {
     return (
       <div style={wrap}>
@@ -69,7 +66,6 @@ export default function AccountBar() {
     );
   }
 
-  // Не вошёл и форма закрыта — кнопка «Войти».
   if (!open) {
     return (
       <div style={wrap}>
@@ -80,84 +76,57 @@ export default function AccountBar() {
     );
   }
 
-  async function sendCode() {
+  async function sendLink() {
     const e = email.trim();
     if (!e) return;
     setBusy(true);
     setMsg("");
-    const { error } = await supabase.auth.signInWithOtp({ email: e });
-    setBusy(false);
-    if (error) {
-      setMsg("Не получилось отправить код: " + error.message);
-      return;
-    }
-    setStage("enterCode");
-    setMsg("Код отправлен на почту. Проверьте входящие и папку «Спам».");
-  }
-
-  async function verify() {
-    const e = email.trim();
-    const t = code.trim();
-    if (!t) return;
-    setBusy(true);
-    setMsg("");
-    const { error } = await supabase.auth.verifyOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email: e,
-      token: t,
-      type: "email",
+      options: {
+        // Вернуть человека на ту же страницу, откуда он входил
+        // (работает и на localhost, и на «живом» сайте).
+        emailRedirectTo: window.location.origin + "/",
+      },
     });
     setBusy(false);
     if (error) {
-      setMsg("Неверный или просроченный код. Попробуйте ещё раз.");
+      setMsg("Не получилось отправить письмо: " + error.message);
       return;
     }
-    // Успех — useAuth подхватит сессию и покажет «Вы вошли».
+    setSent(true);
+    setMsg(
+      "Письмо со ссылкой для входа отправлено. Откройте письмо НА ЭТОМ ЖЕ устройстве и нажмите ссылку — вы вернётесь сюда уже вошедшими. Проверьте папку «Спам».",
+    );
   }
 
   return (
     <div style={{ ...wrap, flexDirection: "column", alignItems: "flex-end" }}>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        {stage === "enterEmail" ? (
-          <>
-            <input
-              style={input}
-              type="email"
-              placeholder="ваша почта"
-              value={email}
-              onChange={(ev) => setEmail(ev.target.value)}
-            />
-            <button style={btn} onClick={sendCode} disabled={busy}>
-              {busy ? "Отправка…" : "Получить код"}
-            </button>
-          </>
-        ) : (
-          <>
-            <input
-              style={{ ...input, width: 120 }}
-              inputMode="numeric"
-              placeholder="код из письма"
-              value={code}
-              onChange={(ev) => setCode(ev.target.value)}
-            />
-            <button style={btn} onClick={verify} disabled={busy}>
-              {busy ? "Проверка…" : "Войти"}
-            </button>
-          </>
-        )}
-        <button
-          style={link}
-          onClick={() => {
-            setOpen(false);
-            setStage("enterEmail");
-            setCode("");
-            setMsg("");
-          }}
-        >
-          отмена
-        </button>
-      </div>
+      {!sent && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <input
+            style={input}
+            type="email"
+            placeholder="ваша почта"
+            value={email}
+            onChange={(ev) => setEmail(ev.target.value)}
+          />
+          <button style={btn} onClick={sendLink} disabled={busy}>
+            {busy ? "Отправка…" : "Получить ссылку для входа"}
+          </button>
+          <button
+            style={link}
+            onClick={() => {
+              setOpen(false);
+              setMsg("");
+            }}
+          >
+            отмена
+          </button>
+        </div>
+      )}
       {msg && (
-        <div style={{ fontSize: 13, color: "var(--ink-faint, #8089a0)", maxWidth: 360 }}>
+        <div style={{ fontSize: 13, color: "var(--ink-faint, #8089a0)", maxWidth: 380 }}>
           {msg}
         </div>
       )}

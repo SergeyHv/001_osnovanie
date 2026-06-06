@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { HashRouter, Routes, Route, Link } from "react-router-dom";
 import Home from "./components/Home";
 import LessonView from "./components/LessonView";
 import AccountBar from "./components/AccountBar";
+import { supabase } from "./lib/supabase";
 import { overallProgress, resetProgress } from "./lib/progress";
 import { useProgress } from "./lib/useProgress";
 
@@ -46,6 +48,17 @@ function Footer() {
 }
 
 export default function App() {
+  // После входа по ссылке адрес может содержать служебный «билет».
+  // Когда вход завершён — аккуратно возвращаем человека на главную.
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" && !window.location.hash.startsWith("#/")) {
+        window.location.hash = "#/";
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   return (
     <HashRouter>
       <div className="app">
@@ -54,6 +67,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/lesson/:lessonId" element={<LessonView />} />
+          {/* Запасной маршрут: любой непонятный адрес ведёт на главную */}
+          <Route path="*" element={<Home />} />
         </Routes>
         <Footer />
       </div>

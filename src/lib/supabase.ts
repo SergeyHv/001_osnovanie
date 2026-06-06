@@ -2,8 +2,10 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseConfig } from "./supabaseConfig";
 
 // Единый клиент Supabase для всего приложения.
-// detectSessionInUrl: false — потому что сайт использует HashRouter и вход по коду,
-// а не по ссылке-редиректу; так надёжнее и без конфликтов с адресами уроков.
+// detectSessionInUrl: true — чтобы при возврате по ссылке из письма
+// клиент сам нашёл «билет» входа в адресе и завершил авторизацию.
+// flowType: "implicit" — билет приходит в hash-части адреса; это
+// корректно работает вместе с нашей ручной обработкой в App.
 export const supabase = createClient(
   supabaseConfig.url,
   supabaseConfig.publishableKey,
@@ -11,7 +13,8 @@ export const supabase = createClient(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false,
+      detectSessionInUrl: true,
+      flowType: "implicit",
     },
   },
 );
