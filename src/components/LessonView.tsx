@@ -21,6 +21,11 @@ export default function LessonView() {
     [lesson],
   );
 
+  // При переходе на другой урок прокручиваем страницу наверх.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [lesson?.id]);
+
   // Урок без теста И без размышления считается пройденным по факту открытия.
   useEffect(() => {
     if (lesson && !lesson.quiz && !lesson.reflection && isUnlocked(lesson.id)) {
@@ -66,8 +71,10 @@ export default function LessonView() {
     );
   }
 
+  // Ключ на всю область урока: при смене урока React гарантированно
+  // убирает прежнее содержимое (тест/размышление) и строит новое.
   return (
-    <div>
+    <div key={lesson.id}>
       <div className="crumbs">
         <Link to="/">Уровни</Link> · {level?.title} · {module?.title}
       </div>
@@ -78,12 +85,12 @@ export default function LessonView() {
       />
 
       {lesson.quiz && (
-        <Quiz key={lesson.id} lessonId={lesson.id} quiz={lesson.quiz} />
+        <Quiz key={lesson.id + "-quiz"} lessonId={lesson.id} quiz={lesson.quiz} />
       )}
 
       {lesson.reflection && (
         <Reflection
-          key={lesson.id}
+          key={lesson.id + "-reflection"}
           lessonId={lesson.id}
           lessonTitle={lesson.title}
           reflection={lesson.reflection}
